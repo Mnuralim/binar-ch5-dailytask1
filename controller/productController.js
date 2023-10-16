@@ -1,4 +1,4 @@
-const { Product } = require("../models");
+const { Product, Shop } = require("../models");
 const imagekit = require("../lib/imagekit");
 const ApiError = require("../utils/apiError");
 
@@ -43,7 +43,12 @@ const createProduct = async (req, res, next) => {
 
 const findProducts = async (req, res, next) => {
   try {
-    const products = await Product.findAll();
+    const products = await Product.findAll({
+      include: {
+        model: Shop,
+        attributes: ["id", "name"],
+      },
+    });
 
     res.status(200).json({
       status: "Success",
@@ -62,6 +67,10 @@ const findProductById = async (req, res, next) => {
     const product = await Product.findOne({
       where: {
         id: prodid,
+      },
+      include: {
+        model: Shop,
+        attributes: ["id", "name"],
       },
     });
 

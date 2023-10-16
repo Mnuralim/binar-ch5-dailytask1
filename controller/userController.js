@@ -1,9 +1,14 @@
-const { User } = require("../models");
+const { User, Shop } = require("../models");
 const ApiError = require("../utils/apiError");
 
 const getAllUsers = async (req, res, next) => {
   try {
-    const users = await User.findAll();
+    const users = await User.findAll({
+      include: {
+        model: Shop,
+        attributes: ["id", "name"],
+      },
+    });
     res.status(200).json({
       status: "Success",
       data: {
@@ -21,6 +26,10 @@ const getUserById = async (req, res, next) => {
     const user = await User.findOne({
       where: {
         id: userid,
+      },
+      include: {
+        model: Shop,
+        attributes: ["id", "name"],
       },
     });
     res.status(200).json({
