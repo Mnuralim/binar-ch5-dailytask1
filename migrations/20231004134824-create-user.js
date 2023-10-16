@@ -9,6 +9,9 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
+      shopId: {
+        type: Sequelize.INTEGER,
+      },
       name: {
         type: Sequelize.STRING,
       },
@@ -17,6 +20,10 @@ module.exports = {
       },
       address: {
         type: Sequelize.STRING,
+      },
+      role: {
+        type: Sequelize.ENUM(["owner", "staff"]),
+        defaultValue: "staff",
       },
       createdAt: {
         allowNull: false,

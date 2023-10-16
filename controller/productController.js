@@ -4,6 +4,7 @@ const ApiError = require("../utils/apiError");
 
 const createProduct = async (req, res, next) => {
   const { name, price, stock } = req.body;
+  const user = req.user;
   const file = req.file;
   let img;
 
@@ -26,6 +27,7 @@ const createProduct = async (req, res, next) => {
       price,
       stock,
       imageUrl: img,
+      shopId: user.shopId,
     });
 
     res.status(200).json({
@@ -55,10 +57,11 @@ const findProducts = async (req, res, next) => {
 };
 
 const findProductById = async (req, res, next) => {
+  const { prodid } = req.params;
   try {
     const product = await Product.findOne({
       where: {
-        id: req.params.id,
+        id: prodid,
       },
     });
 
@@ -75,8 +78,13 @@ const findProductById = async (req, res, next) => {
 
 const UpdateProduct = async (req, res, next) => {
   const { name, price, stock } = req.body;
+  const { prodid } = req.params;
+  const user = req.user;
   try {
-    const product = await Product.update(
+    const findProduct = await Product.findByPk(prodid);
+    if (findProduct.shopId !== user.shopId) return next(new ApiError("You are not the owner of the store that owns this product", 400));
+
+    await Product.update(
       {
         name,
         price,
@@ -84,7 +92,7 @@ const UpdateProduct = async (req, res, next) => {
       },
       {
         where: {
-          id: req.params.id,
+          id: prodid,
         },
       }
     );
@@ -99,21 +107,15 @@ const UpdateProduct = async (req, res, next) => {
 };
 
 const deleteProduct = async (req, res, next) => {
-  const { name, price, stock } = req.body;
+  const { prodid } = req.params;
+  const user = req.user;
   try {
-    const product = await Product.findOne({
-      where: {
-        id: req.params.id,
-      },
-    });
-
-    if (!product) {
-      next(new ApiError("Product id tersebut gak ada", 404));
-    }
+    const findProduct = await Product.findByPk(prodid);
+    if (findProduct.shopId !== user.shopId) return next(new ApiError("You are not the owner of the store that owns this product", 400));
 
     await Product.destroy({
       where: {
-        id: req.params.id,
+        id: prodid,
       },
     });
 
